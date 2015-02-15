@@ -1,0 +1,4 @@
+Experimental code to for developing bulk ray tracing in Zemax from Python.
+
+The code is completely experimental at this stage, and it is not even in
+working state.
