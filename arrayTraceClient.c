@@ -128,9 +128,41 @@ void UserFunction(void)
     PostRequestMessage(szBuffer, szBuffer);
 }
 
+void print_ray_data(DDERAYDATA * pRAD)
+{
+    int num_rays;
+    int i;
+    /*Print the ray data for debugging */
+    printf("\nRay data info @ C side:\n");
+    num_rays = pRAD[0].error;
+    printf("Total number of rays = %d\n", num_rays);
+    for (i = 0; i <= num_rays; i++)
+    {
+        printf("\npRAD[%d].x = %f", i, pRAD[i].x);
+        printf("\npRAD[%d].y = %f", i, pRAD[i].y);
+        printf("\npRAD[%d].z = %f", i, pRAD[i].z);
+        printf("\npRAD[%d].l = %f", i, pRAD[i].l);
+        printf("\npRAD[%d].m = %f", i, pRAD[i].m);
+        printf("\npRAD[%d].n = %f", i, pRAD[i].n);
+        printf("\npRAD[%d].opd =%f", i, pRAD[i].opd);
+        printf("\npRAD[%d].intensity = %f", i, pRAD[i].intensity);
+        printf("\npRAD[%d].Exr = %f", i, pRAD[i].Exr);
+        printf("\npRAD[%d].Exi = %f", i, pRAD[i].Exi);
+        printf("\npRAD[%d].Eyr = %f", i, pRAD[i].Eyr);
+        printf("\npRAD[%d].Eyi = %f", i, pRAD[i].Eyi);
+        printf("\npRAD[%d].Ezr = %f", i, pRAD[i].Ezr);
+        printf("\npRAD[%d].Ezi = %f", i, pRAD[i].Ezi);
+        printf("\npRAD[%d].wave = %d", i, pRAD[i].wave);
+        printf("\npRAD[%d].error = %d", i, pRAD[i].error);
+        printf("\npRAD[%d].vigcode = %d", i, pRAD[i].vigcode);
+        printf("\npRAD[%d].want_opd = %d", i, pRAD[i].want_opd);
+        printf("\n");
+    }
+}
+
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 
-int __stdcall arrayTrace(int dummy)
+int __stdcall arrayTrace(DDERAYDATA * pRAD)
 {
     HWND hwnd;
     MSG msg;
@@ -162,6 +194,15 @@ int __stdcall arrayTrace(int dummy)
     */
 
     //strcpy(szCommandLine, szCmdLine);
+
+    printf("\nIn c function arrayTrace:\n");
+
+    print_ray_data(pRAD); 
+
+    printf("\nReturning before communicating with Zemax\n");
+    return 1;
+
+
 
     hwnd = CreateWindow(szAppName, "ZEMAX Client", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
     UpdateWindow(hwnd);

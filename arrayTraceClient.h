@@ -33,8 +33,9 @@ void CenterWindow(HWND hwnd);
 void UserFunction(void);
 void MakeEmptyWindow(int text, char *szAppName, char *szOptions);
 void Get_2_5_10(double cmax, double *cscale);
+void print_ray_data(DDERAYDATA * pRAD);
 
-DLL_EXPORT int __stdcall arrayTrace(int dummy);
+DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD);
 
 #ifdef __cplusplus
 }
