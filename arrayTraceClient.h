@@ -25,13 +25,10 @@ typedef struct
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void WaitForData(HWND hwnd);
 char *GetString(char *szBuffer, int n, char *szSubString);
-void remove_quotes(char *s);
 int  PostRequestMessage(char *szItem, char *szBuffer);
 int  PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD);
-void CenterWindow(HWND hwnd);
 void UserFunction(); 
 void MakeEmptyWindow(int text, char *szAppName, char *szOptions);
-void Get_2_5_10(double cmax, double *cscale);
 void print_ray_data(DDERAYDATA * pRAD);
 DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD);
 

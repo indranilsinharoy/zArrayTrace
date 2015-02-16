@@ -4,6 +4,10 @@ The code is completely experimental at this stage at the moment. The essential
 idea is to use ctypes to create an interface for array ray tracing from
 the example code (zclient.c and ArrayDemo.c) provided by Zemax. 
 
+The main files are arrayTraceClient.c, arrayTraceClient.h and arrayTraceClient.py.
+
+Refer to the file "Information.txt" for details on the Visual Studio project
+configurations I have used to build the dll.
 
 Things that are currently working
 =================================
@@ -16,12 +20,15 @@ Things that are currently working
 
 Roadmap
 =======
-1. Improve the Python interface for calling array ray tracing.
-2. Figure out how to integrate the code with PyZDDE, so that array ray 
+1. If array ray tracing fails in the UserFunction(), there should be way 
+   to propagate the error msg to Python instead of displaying it using
+   MakeEmptyWindow(). 
+2. Improve the Python interface for calling array ray tracing.
+3. Figure out how to integrate the code with PyZDDE, so that array ray 
    tracing may be performed for an existing lens in the Zemax DDE server
    setup using PyZDDE.
-3. Build both 32 bit and 64 bit dlls and test on other machines.
-
+4. Build both 32 bit and 64 bit dlls and test on other machines.
+5. Remove unnecessary code from arrayTraceClient.c
 
 
 Credits

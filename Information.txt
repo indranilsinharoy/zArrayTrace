@@ -1,9 +1,11 @@
 Visual Studio Project settings:
 ==============================
 1. Console Application >> Build DLL & Empty Project
-2. Configuration Properties >> General >> Character Set >> Use Multi-Byte Character Set
-3. Solutions Platform >> x64 & Release 
-4. 
+2. Add the existing files arrayTraceClient.h to the Header Files (under 
+   Solutions Explorer), and arrayTraceClient.c to the Source Files. Also, 
+3. Solutions Platform >> x64/Win32 & Release
+4. Configuration Properties >> General >> Character Set >> Use Multi-Byte Character Set 
+5. Build.
 
 
 Execution of Python file:
@@ -17,5 +19,6 @@ the following command from cmd prompt:
 
 Misc. notes
 ===========
-1. Although, the project was created as a "console application", we can still
+1. T
+2. Although, the project was created as a "console application", we can still
    see MessageBox(s) used in the original c functions if needed.
