@@ -29,12 +29,13 @@ void remove_quotes(char *s);
 int  PostRequestMessage(char *szItem, char *szBuffer);
 int  PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD);
 void CenterWindow(HWND hwnd);
-void UserFunction(char *szCommandLine);
+void UserFunction(); /*void UserFunction(char *szCommandLine);*/
 void MakeEmptyWindow(int text, char *szAppName, char *szOptions);
 void Get_2_5_10(double cmax, double *cscale);
 void print_ray_data(DDERAYDATA * pRAD);
 
-DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag);
+//DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag);
+DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD);
 
 #ifdef __cplusplus
 }

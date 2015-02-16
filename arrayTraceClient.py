@@ -55,7 +55,8 @@ def main(dllName, dllpath):
     arrayTrace = array_trace_lib.arrayTrace
     # specify argtypes and restype
     arrayTrace.restype = c_int
-    arrayTrace.argtypes = [POINTER(DdeArrayData), c_char_p, c_int, c_int]  
+    #arrayTrace.argtypes = [POINTER(DdeArrayData), c_char_p, c_int, c_int]  
+    arrayTrace.argtypes = [POINTER(DdeArrayData)] 
     
     # Set up ray data 
     num_rays = 9
@@ -78,16 +79,17 @@ def main(dllName, dllpath):
 
     #print_ray_data(rd, "Ray data info @ Python side before sending to C side:") # for visual debugging
 
-    tmp_file = r"C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace\arrayTrace.txt"
-    txt_flag, option_flag = 0, 0
-    tmp_file_buf = create_string_buffer(tmp_file)
+    #tmp_file = r"C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace\arrayTrace.txt"
+    #txt_flag, option_flag = 0, 0
+    #tmp_file_buf = create_string_buffer(tmp_file)
 
-    ret = arrayTrace(rd, tmp_file_buf, txt_flag, option_flag)
-    print(ret)
+    #ret = arrayTrace(rd, tmp_file_buf, txt_flag, option_flag)
+    ret = arrayTrace(rd)
 
     if ret==0:
-        print("access the data in rd:")
         print_ray_data(rd, "Ray data info @ Python AFTER ray tracing:")
+    else:
+        print("There was some problem in ray tracing")
     
     print("OK!")
 

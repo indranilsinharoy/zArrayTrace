@@ -53,7 +53,8 @@ DDERAYDATA *rdpGRD = NULL;
 DDERAYDATA *gPtr2RD = NULL;  /* used for passing the ray data array to the user function */
 
 
-void UserFunction(char *szCommandLine)
+//void UserFunction(char *szCommandLine)
+void UserFunction(void)
 /* insr comment:: the UserFunction is not called by the entry point function arrayTrace(). 
    so it seems to me that the way to pass the ray tacing data to this fucntion is by
    using a global variable
@@ -61,20 +62,20 @@ void UserFunction(char *szCommandLine)
    insr TO DO: We can certainly rename "UserFunction" to be more specific, or even completely get 
    rid of it??? */
 {
-    char szModuleName[300];
-    char szOutputFile[300];
-    FILE *output;
+    //char szModuleName[300];
+    //char szOutputFile[300];
+    //FILE *output;
     //int  i, j;
-    int k;
-    int show_settings;
+    //int k;
+    //int show_settings;
     static char szBuffer[5000], szSub[256], szAppName[] = "Array Demo";
     int numRays;
     //DDERAYDATA RD[1000];
     
     /* extract the command line arguments */
-    show_settings = atoi(GetString(szCommandLine, 1, szSub));
+    //show_settings = atoi(GetString(szCommandLine, 1, szSub));
     /* this tells us where to put the output data */
-    GetString(szCommandLine, 2, szOutputFile);
+    //GetString(szCommandLine, 2, szOutputFile);
     //remove_quotes(szOutputFile);
 
     //MessageBox(hwndClient, szCommandLine, "szCommandLine:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
@@ -150,17 +151,18 @@ void UserFunction(char *szCommandLine)
     /* Okay, we got the data! There, wasn't that easy! */
 
     /* open a file for output */
+    /*
     if ((output = fopen(szOutputFile, "wt")) == NULL)
     {
-        /* can't open the file!! */
-        return;
+        return;  // can't open the file!! 
     }
+    */
 
     /* this windows function gives us the name of our own executable; we pass this back to ZEMAX */
-    GetModuleFileName(globalhInstance, szModuleName, 255);
+    //GetModuleFileName(globalhInstance, szModuleName, 255);
 
     /* ok, make a text listing */
-    fputs("Listing of Array trace data\n", output);
+    //fputs("Listing of Array trace data\n", output);
     /*
     fputs("     px      py error            xout            yout   trans\n", output);
 
@@ -176,27 +178,24 @@ void UserFunction(char *szCommandLine)
         }
     }
     */
+    /*
     fputs("error            xout            yout   trans\n", output);
     for (k = 1; k <= numRays; k++)
     {
         sprintf(szBuffer, "%5i %15.6E %15.6E %7.4f\n", gPtr2RD[k].error, gPtr2RD[k].x, gPtr2RD[k].y, gPtr2RD[k].intensity);
         fputs(szBuffer, output);
     }
-
+    */
     /* close the file! */
-    fclose(output);
+    //fclose(output);
 
     gPtr2RD = NULL;
 
     /* create a text window. Note we pass back the filename and module name. */
-
     //MessageBox(hwndClient, szOutputFile, "Output file:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-
-    sprintf(szBuffer, "MakeTextWindow,\"%s\",\"%s\",\"%s\"", szOutputFile, szModuleName, szAppName);
-
+    //sprintf(szBuffer, "MakeTextWindow,\"%s\",\"%s\",\"%s\"", szOutputFile, szModuleName, szAppName);
     //MessageBox(hwndClient, szBuffer, "szBuffer:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-
-    PostRequestMessage(szBuffer, szBuffer);
+    //PostRequestMessage(szBuffer, szBuffer);
 }
 
 void print_ray_data(DDERAYDATA * pRAD)
@@ -233,8 +232,9 @@ void print_ray_data(DDERAYDATA * pRAD)
 }
 
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
+//int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag)
 
-int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag)
+int __stdcall arrayTrace(DDERAYDATA * pRAD)
 {
     HWND hwnd;
     MSG msg;
@@ -266,7 +266,7 @@ int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optf
     */
 
     //strcpy(szCommandLine, szCmdLine); 
-    sprintf(szCommandLine, "%d %d %s", txtflag, optflag, tmpfile);
+    //sprintf(szCommandLine, "%d %d %s", txtflag, optflag, tmpfile);
     
     // insr TO DO :: remove the following DBG printfs later.
     //printf("\nIn c function arrayTrace:\n");
@@ -352,7 +352,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
         hwndClient = hwnd;
 
-        UserFunction(szCommandLine);
+        UserFunction();  /* UserFunction(szCommandLine);*/
 
         /* terminate the DDE connection */
         PostMessage(hwndServer, WM_DDE_TERMINATE, (WPARAM)hwnd, 0L);
