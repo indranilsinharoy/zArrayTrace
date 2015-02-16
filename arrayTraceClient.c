@@ -64,10 +64,12 @@ void UserFunction(char *szCommandLine)
     char szModuleName[300];
     char szOutputFile[300];
     FILE *output;
-    int  i, j, k;
+    //int  i, j;
+    int k;
     int show_settings;
     static char szBuffer[5000], szSub[256], szAppName[] = "Array Demo";
-    DDERAYDATA RD[1000];
+    int numRays;
+    //DDERAYDATA RD[1000];
     
     /* extract the command line arguments */
     show_settings = atoi(GetString(szCommandLine, 1, szSub));
@@ -93,29 +95,32 @@ void UserFunction(char *szCommandLine)
 
     //if (show_settings) MessageBox(hwndClient, "This window has no options.", "ZEMAX Client Window", MB_ICONEXCLAMATION | MB_OK | MB_SYSTEMMODAL);
 
-    printf("\nIn c function UserFunction:\n");
-    print_ray_data(gPtr2RD);
-    gPtr2RD = NULL;
-    printf("\nReturning ...\n");
-    return;
+    //printf("\nIn c function UserFunction:\n");
+    //print_ray_data(gPtr2RD);
+    //gPtr2RD = NULL;
+    //printf("\nReturning ...\n");
+    //return;
     
-
-
+    numRays = gPtr2RD[0].error;
+   
     /* Fill RD with data to trace some rays */
+    /*
     RD[0].x = 0.0;
     RD[0].y = 0.0;
     RD[0].z = 0.0;
     RD[0].l = 0.0;
     RD[0].m = 0.0;
     RD[0].n = 0.0;
-    RD[0].opd = 0.0; /* mode 0, like GetTrace */
+    RD[0].opd = 0.0; // mode 0, like GetTrace 
     RD[0].intensity = 0.0;
     RD[0].wave = 0;
-    RD[0].error = 0; /* trace a bunch of rays */
+    RD[0].error = 0; // trace a bunch of rays
     RD[0].vigcode = 0;
     RD[0].want_opd = -1;
+    */
 
     /* define the rays */
+    /*
     k = 0;
     for (i = -10; i <= 10; i++)
     {
@@ -136,10 +141,12 @@ void UserFunction(char *szCommandLine)
             RD[k].want_opd = 0;
         }
     }
-    RD[0].error = k; /* trace the k rays */
+    RD[0].error = k; // trace the k rays 
+    */
 
     /* Now go get the data .... the data is put back into RD in the function PostArrayTraceMessage*/
-    PostArrayTraceMessage(szBuffer, RD);
+    //PostArrayTraceMessage(szBuffer, RD);
+    PostArrayTraceMessage(szBuffer, gPtr2RD);
     /* Okay, we got the data! There, wasn't that easy! */
 
     /* open a file for output */
@@ -154,7 +161,7 @@ void UserFunction(char *szCommandLine)
 
     /* ok, make a text listing */
     fputs("Listing of Array trace data\n", output);
-
+    /*
     fputs("     px      py error            xout            yout   trans\n", output);
 
     k = 0;
@@ -168,8 +175,18 @@ void UserFunction(char *szCommandLine)
             fputs(szBuffer, output);
         }
     }
+    */
+    fputs("error            xout            yout   trans\n", output);
+    for (k = 1; k <= numRays; k++)
+    {
+        sprintf(szBuffer, "%5i %15.6E %15.6E %7.4f\n", gPtr2RD[k].error, gPtr2RD[k].x, gPtr2RD[k].y, gPtr2RD[k].intensity);
+        fputs(szBuffer, output);
+    }
+
     /* close the file! */
     fclose(output);
+
+    gPtr2RD = NULL;
 
     /* create a text window. Note we pass back the filename and module name. */
 
@@ -186,12 +203,12 @@ void print_ray_data(DDERAYDATA * pRAD)
 {
     /*helper function to print ray data, which may be useful
       for code testing visually*/
-    int num_rays;
+    int numRays;
     int i;
     printf("\nRay data info @ C side:\n");
-    num_rays = pRAD[0].error;
-    printf("Total number of rays = %d\n", num_rays);
-    for (i = 0; i <= num_rays; i++)
+    numRays = pRAD[0].error;
+    printf("Total number of rays = %d\n", numRays);
+    for (i = 0; i <= numRays; i++)
     {
         printf("\npRAD[%d].x = %f", i, pRAD[i].x);
         printf("\npRAD[%d].y = %f", i, pRAD[i].y);

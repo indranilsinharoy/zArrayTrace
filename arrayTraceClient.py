@@ -22,10 +22,10 @@ class DdeArrayData(Structure):
                 ('vigcode', c_int), ('want_opd', c_int)]
 
 
-
-def print_ray_data(rd):
+def print_ray_data(rd, infoText):
     # Print the ray data for debugging
-    print("Ray data info @ Python side before sending to C side:\n")
+    print(infoText)
+    print("\n")
     num_rays = rd[0].error
     for i in range(num_rays + 1):
         print("rd[{}].x = ".format(i), rd[i].x)
@@ -76,13 +76,18 @@ def main(dllName, dllpath):
             rd[k].wave = 1
 
 
-    #print_ray_data(rd) # for visual debugging
+    #print_ray_data(rd, "Ray data info @ Python side before sending to C side:") # for visual debugging
+
     tmp_file = r"C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace\arrayTrace.txt"
     txt_flag, option_flag = 0, 0
     tmp_file_buf = create_string_buffer(tmp_file)
 
     ret = arrayTrace(rd, tmp_file_buf, txt_flag, option_flag)
     print(ret)
+
+    if ret==0:
+        print("access the data in rd:")
+        print_ray_data(rd, "Ray data info @ Python AFTER ray tracing:")
     
     print("OK!")
 
