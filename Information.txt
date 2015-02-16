@@ -1,12 +1,21 @@
 Visual Studio Project settings:
-
-1. Console Application >> DLL >> Empty Project
+==============================
+1. Console Application >> Build DLL & Empty Project
 2. Configuration Properties >> General >> Character Set >> Use Multi-Byte Character Set
 3. Solutions Platform >> x64 & Release 
 4. 
 
 
 Execution of Python file:
-Open windows command prompt and execute:
+=========================
 
-"python arrayTraceClient.py" in the directory C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace
+cd to the directory C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace and execute
+the following command from cmd prompt:
+
+    python arrayTraceClient.py
+
+
+Misc. notes
+===========
+1. Although, the project was created as a "console application", we can still
+   see MessageBox(s) used in the original c functions if needed.

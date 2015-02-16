@@ -1,6 +1,47 @@
+// Most of the code in this file is from the C programs zclient.c and ArrayDemo.c, originally written 
+// by Kenneth Moore, and they are shipped with Zemax.
+
+// Top-level block comment from zclient.c
+// --------------------------------------
+// Zclient: ZEMAX client template program
+// Originally written by Kenneth Moore June 1997
+// Copyright 1997-2006 Kenneth Moore
+//
+// Normally, none of this code needs to be modified. Simply include this file and
+// compile and link with the code that contains "UserFunction".
+// The zclient program is responsible for establishing communication
+// with the ZEMAX server. All data from ZEMAX can be obtained by calling
+// PostRequestMessage or PostArrayTraceMessage with the item name and a buffer to hold the data.
+//
+// Zclient will call UserFunction when the DDE communication link is established and ready.
+// Zclient will automatically terminate the connection when UserFunction returns.
+//
+// Version 1.1 modified to support Array ray tracing September, 1997
+// Version 1.2 modified for faster execution October, 1997
+// Version 1.3 modified for faster execution November, 1997
+// Version 1.4 modified to fix memory leak January, 1998
+// Version 1.5 modified to add support for long path names and quotes November, 1998
+// Version 1.6 modified to fix missing support for long path names and quotes in MakeEmptyWindow March, 1999
+// Version 1.7 modified to fix memory leak in WM_DDE_ACK, March 1999
+// Version 1.8 modified to add E-field data to DDERAYDATA for ZEMAX 10.0, December 2000
+// Version 1.9 modified PostRequestMessage and PostArrayTraceMessage to return -1 if data failed (usually because of a timeout) or 0 otherwise, April 2001
+// Version 2.0 modified WM_USER_INITIATE to distingush between 2 possibly simultaneous copies of ZEMAX running when responding to UDOP calls, September 1, 2006
+// Version 2.1 modified to support Visual Studio 2005. Added the #pragma to disable the warning about deprecated functions
+// Version 2.2 modified to move GotData=0 to more robust position. If ZEMAX returns data very quickly a deadlock can occur. November 30, 2007
+// Version 2.3 modified the typecast of uiLow and uiHi from UINT to UINT_PTR.  CODE ONLY WORKS IN 64-BIT (Debug or Release).  Recast (int) msg.wParam as a return argument for WINAPI
+
+// Top-level block comment from ArrayDemo.c
+// ----------------------------------------
+// ArrayDemo sample program
+// Written by Kenneth Moore March 1999
+// Version 1.0
+// prints intensity modified by user defined surfaces - June 1999
+// This sample program illustrates using ZCLIENT calls to trace large numbers
+// of rays with the GetTRaceArray family of DDE calls. It is really easy to do!
+// Most of this code is just for defining the rays to trace and printing the results.
+
 
 #include "arrayTraceClient.h"
-
 
 /* global variables used by the client code */
 char szAppName[] = "ZemaxClient";
@@ -9,24 +50,29 @@ char szGlobalBuffer[5000], szCommandLine[260];
 HINSTANCE globalhInstance;
 HWND hwndServer, hwndClient;
 DDERAYDATA *rdpGRD = NULL;
+DDERAYDATA *gPtr2RD = NULL;  /* used for passing the ray data array to the user function */
 
 
-//void UserFunction(char *szCommandLine)
-void UserFunction(void)
-/* TO DO:: perhaps UserFunction can taken a pointer to the DDERAYDATA array*/
+void UserFunction(char *szCommandLine)
+/* insr comment:: the UserFunction is not called by the entry point function arrayTrace(). 
+   so it seems to me that the way to pass the ray tacing data to this fucntion is by
+   using a global variable
+   
+   insr TO DO: We can certainly rename "UserFunction" to be more specific, or even completely get 
+   rid of it??? */
 {
     char szModuleName[300];
-    char szOutputFile[300] = "C:\\PROGRAMSANDEXPERIMENTS\\ZEMAX\\Extend\\ArrayTrace\\arrayTrace.txt";
+    char szOutputFile[300];
     FILE *output;
     int  i, j, k;
-    //int show_settings;
+    int show_settings;
     static char szBuffer[5000], szSub[256], szAppName[] = "Array Demo";
     DDERAYDATA RD[1000];
     
     /* extract the command line arguments */
-    //show_settings = atoi(GetString(szCommandLine, 1, szSub));
+    show_settings = atoi(GetString(szCommandLine, 1, szSub));
     /* this tells us where to put the output data */
-    //GetString(szCommandLine, 2, szOutputFile);
+    GetString(szCommandLine, 2, szOutputFile);
     //remove_quotes(szOutputFile);
 
     //MessageBox(hwndClient, szCommandLine, "szCommandLine:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
@@ -46,6 +92,14 @@ void UserFunction(void)
     }
 
     //if (show_settings) MessageBox(hwndClient, "This window has no options.", "ZEMAX Client Window", MB_ICONEXCLAMATION | MB_OK | MB_SYSTEMMODAL);
+
+    printf("\nIn c function UserFunction:\n");
+    print_ray_data(gPtr2RD);
+    gPtr2RD = NULL;
+    printf("\nReturning ...\n");
+    return;
+    
+
 
     /* Fill RD with data to trace some rays */
     RD[0].x = 0.0;
@@ -84,7 +138,7 @@ void UserFunction(void)
     }
     RD[0].error = k; /* trace the k rays */
 
-    /* Now go get the data */
+    /* Now go get the data .... the data is put back into RD in the function PostArrayTraceMessage*/
     PostArrayTraceMessage(szBuffer, RD);
     /* Okay, we got the data! There, wasn't that easy! */
 
@@ -130,9 +184,10 @@ void UserFunction(void)
 
 void print_ray_data(DDERAYDATA * pRAD)
 {
+    /*helper function to print ray data, which may be useful
+      for code testing visually*/
     int num_rays;
     int i;
-    /*Print the ray data for debugging */
     printf("\nRay data info @ C side:\n");
     num_rays = pRAD[0].error;
     printf("Total number of rays = %d\n", num_rays);
@@ -162,7 +217,7 @@ void print_ray_data(DDERAYDATA * pRAD)
 
 //int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 
-int __stdcall arrayTrace(DDERAYDATA * pRAD)
+int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag)
 {
     HWND hwnd;
     MSG msg;
@@ -193,16 +248,17 @@ int __stdcall arrayTrace(DDERAYDATA * pRAD)
     }
     */
 
-    //strcpy(szCommandLine, szCmdLine);
+    //strcpy(szCommandLine, szCmdLine); 
+    sprintf(szCommandLine, "%d %d %s", txtflag, optflag, tmpfile);
+    
+    // insr TO DO :: remove the following DBG printfs later.
+    //printf("\nIn c function arrayTrace:\n");
+    //print_ray_data(pRAD);
+    //printf("szCommandLine = %s", szCommandLine);
+    //printf("\nReturning before communicating with Zemax\n");
+    //return 1;
 
-    printf("\nIn c function arrayTrace:\n");
-
-    print_ray_data(pRAD); 
-
-    printf("\nReturning before communicating with Zemax\n");
-    return 1;
-
-
+    gPtr2RD = pRAD;  /* point to where the data is so that the userfunction() can access it */
 
     hwnd = CreateWindow(szAppName, "ZEMAX Client", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
     UpdateWindow(hwnd);
@@ -279,7 +335,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
         hwndClient = hwnd;
 
-        UserFunction();  //UserFunction(szCommandLine);
+        UserFunction(szCommandLine);
 
         /* terminate the DDE connection */
         PostMessage(hwndServer, WM_DDE_TERMINATE, (WPARAM)hwnd, 0L);

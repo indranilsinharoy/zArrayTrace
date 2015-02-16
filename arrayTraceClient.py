@@ -1,7 +1,7 @@
 from __future__ import print_function, division
-from ctypes import  c_int, c_double, Structure, POINTER
-import numpy as np
-from numpy.ctypeslib import load_library
+from ctypes import  WinDLL, c_int, c_double, Structure, POINTER, c_char_p, create_string_buffer
+#import numpy as np
+#from numpy.ctypeslib import load_library
 
 # Ray data structure
 # Following fields in the 0th array element have special meaning:
@@ -50,11 +50,12 @@ def print_ray_data(rd):
 
 def main(dllName, dllpath):
     # load the arrayTrace library
-    array_trace_lib = load_library(dllName, dllpath)
+    #array_trace_lib = load_library(dllName, dllpath)
+    array_trace_lib = WinDLL(dllpath + dllName)
     arrayTrace = array_trace_lib.arrayTrace
     # specify argtypes and restype
     arrayTrace.restype = c_int
-    arrayTrace.argtypes = [POINTER(DdeArrayData)]
+    arrayTrace.argtypes = [POINTER(DdeArrayData), c_char_p, c_int, c_int]  
     
     # Set up ray data 
     num_rays = 9
@@ -76,11 +77,13 @@ def main(dllName, dllpath):
 
 
     #print_ray_data(rd) # for visual debugging
+    tmp_file = r"C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace\arrayTrace.txt"
+    txt_flag, option_flag = 0, 0
+    tmp_file_buf = create_string_buffer(tmp_file)
 
-
-    ret = arrayTrace(rd)
-
-    #print(ret)
+    ret = arrayTrace(rd, tmp_file_buf, txt_flag, option_flag)
+    print(ret)
+    
     print("OK!")
 
 if __name__ == '__main__':
