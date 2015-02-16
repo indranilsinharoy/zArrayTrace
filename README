@@ -39,7 +39,7 @@ sometime back, which gave me some crucial ideas about the implementation.
 Julian, who was also successful in implementing array ray tracing using 
 ctypes, communicated several ideas with me about the implementation. 
 
-1. Ian Rousseau (Creative Microsystems)
+1. Ian Rousseau
 2. Julian Stürmer
 
 License

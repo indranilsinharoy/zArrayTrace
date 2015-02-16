@@ -162,6 +162,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
         aTop = GlobalAddAtom("RayData");
 
+        //printf("\nDBG printf: WM_USER_INITIATE : ZEMAX_INSTANCE = %d\n", ZEMAX_INSTANCE);
+
         SendMessage(HWND_BROADCAST, WM_DDE_INITIATE, (WPARAM)hwnd, MAKELONG(aApp, aTop));
 
         /* delete the atoms */
