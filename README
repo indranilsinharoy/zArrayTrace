@@ -8,9 +8,10 @@ the example code (zclient.c and ArrayDemo.c) provided by Zemax.
 Things that are currently working
 =================================
 1. Able to do array ray tracing (independent of PyZDDE). The output matches
-   the output of the ArrayDemo.c example that comes with Zemax, using the 
+   the output of ArrayDemo.c example that comes with Zemax, using the 
    lens file Cooke 40 degree field.zmx. The output of ArrayDemo.c is in the
-   file arrayDemoRef.txt. The output of the function 
+   file arrayDemoRef.txt. The output of the Python function replicateArrayDemo()
+   is in the file arrayDemo.txt 
 
 
 Roadmap
