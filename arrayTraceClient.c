@@ -53,33 +53,9 @@ DDERAYDATA *rdpGRD = NULL;
 DDERAYDATA *gPtr2RD = NULL;  /* used for passing the ray data array to the user function */
 
 
-//void UserFunction(char *szCommandLine)
 void UserFunction(void)
-/* insr comment:: the UserFunction is not called by the entry point function arrayTrace(). 
-   so it seems to me that the way to pass the ray tacing data to this fucntion is by
-   using a global variable
-   
-   insr TO DO: We can certainly rename "UserFunction" to be more specific, or even completely get 
-   rid of it??? */
 {
-    //char szModuleName[300];
-    //char szOutputFile[300];
-    //FILE *output;
-    //int  i, j;
-    //int k;
-    //int show_settings;
     static char szBuffer[5000], szSub[256], szAppName[] = "Array Demo";
-    int numRays;
-    //DDERAYDATA RD[1000];
-    
-    /* extract the command line arguments */
-    //show_settings = atoi(GetString(szCommandLine, 1, szSub));
-    /* this tells us where to put the output data */
-    //GetString(szCommandLine, 2, szOutputFile);
-    //remove_quotes(szOutputFile);
-
-    //MessageBox(hwndClient, szCommandLine, "szCommandLine:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-    //MessageBox(hwndClient, szOutputFile, "Output file:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
 
     /* first, update the lens so we have the latest data; and then test to make sure the system is valid */
     PostRequestMessage("GetUpdate", szBuffer);
@@ -93,109 +69,11 @@ void UserFunction(void)
         MakeEmptyWindow(1, szAppName, szBuffer);
         return;
     }
-
-    //if (show_settings) MessageBox(hwndClient, "This window has no options.", "ZEMAX Client Window", MB_ICONEXCLAMATION | MB_OK | MB_SYSTEMMODAL);
-
-    //printf("\nIn c function UserFunction:\n");
-    //print_ray_data(gPtr2RD);
-    //gPtr2RD = NULL;
-    //printf("\nReturning ...\n");
-    //return;
-    
-    numRays = gPtr2RD[0].error;
-   
-    /* Fill RD with data to trace some rays */
-    /*
-    RD[0].x = 0.0;
-    RD[0].y = 0.0;
-    RD[0].z = 0.0;
-    RD[0].l = 0.0;
-    RD[0].m = 0.0;
-    RD[0].n = 0.0;
-    RD[0].opd = 0.0; // mode 0, like GetTrace 
-    RD[0].intensity = 0.0;
-    RD[0].wave = 0;
-    RD[0].error = 0; // trace a bunch of rays
-    RD[0].vigcode = 0;
-    RD[0].want_opd = -1;
-    */
-
-    /* define the rays */
-    /*
-    k = 0;
-    for (i = -10; i <= 10; i++)
-    {
-        for (j = -10; j <= 10; j++)
-        {
-            k++;
-            RD[k].x = 0.0;
-            RD[k].y = 0.0;
-            RD[k].z = (double)i / 20.0;
-            RD[k].l = (double)j / 20.0;
-            RD[k].m = 0.0;
-            RD[k].n = 0.0;
-            RD[k].opd = 0.0;
-            RD[k].intensity = 1.0;
-            RD[k].wave = 1;
-            RD[k].error = 0;
-            RD[k].vigcode = 0;
-            RD[k].want_opd = 0;
-        }
-    }
-    RD[0].error = k; // trace the k rays 
-    */
-
-    /* Now go get the data .... the data is put back into RD in the function PostArrayTraceMessage*/
-    //PostArrayTraceMessage(szBuffer, RD);
+  
+    /* Now go get the data .... the data is put back into gPtr2RD in the function PostArrayTraceMessage*/
     PostArrayTraceMessage(szBuffer, gPtr2RD);
-    /* Okay, we got the data! There, wasn't that easy! */
-
-    /* open a file for output */
-    /*
-    if ((output = fopen(szOutputFile, "wt")) == NULL)
-    {
-        return;  // can't open the file!! 
-    }
-    */
-
-    /* this windows function gives us the name of our own executable; we pass this back to ZEMAX */
-    //GetModuleFileName(globalhInstance, szModuleName, 255);
-
-    /* ok, make a text listing */
-    //fputs("Listing of Array trace data\n", output);
-    /*
-    fputs("     px      py error            xout            yout   trans\n", output);
-
-    k = 0;
-    for (i = -10; i <= 10; i++)
-    {
-        for (j = -10; j <= 10; j++)
-        {
-            k++;
-
-            sprintf(szBuffer, "%7.3f %7.3f %5i %15.6E %15.6E %7.4f\n", (double)i / 20.0, (double)j / 20.0, RD[k].error, RD[k].x, RD[k].y, RD[k].intensity);
-            fputs(szBuffer, output);
-        }
-    }
-    */
-    /*
-    fputs("error            xout            yout   trans\n", output);
-    for (k = 1; k <= numRays; k++)
-    {
-        sprintf(szBuffer, "%5i %15.6E %15.6E %7.4f\n", gPtr2RD[k].error, gPtr2RD[k].x, gPtr2RD[k].y, gPtr2RD[k].intensity);
-        fputs(szBuffer, output);
-    }
-    */
-    /* close the file! */
-    //fclose(output);
-
+    
     gPtr2RD = NULL;
-
-    /* create a text window. Note we pass back the filename and module name. */
-    //MessageBox(hwndClient, szOutputFile, "Output file:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-    //sprintf(szBuffer, "MakeTextWindow,\"%s\",\"%s\",\"%s\"", szOutputFile, szModuleName, szAppName);
-    //MessageBox(hwndClient, szBuffer, "szBuffer:", MB_OK|MB_ICONEXCLAMATION|MB_APPLMODAL);
-    //PostRequestMessage(szBuffer, szBuffer);
 }
 
 void print_ray_data(DDERAYDATA * pRAD)
@@ -230,9 +108,6 @@ void print_ray_data(DDERAYDATA * pRAD)
         printf("\n");
     }
 }
-
-//int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
-//int __stdcall arrayTrace(DDERAYDATA * pRAD, char* tmpfile, int txtflag, int optflag)
 
 int __stdcall arrayTrace(DDERAYDATA * pRAD)
 {

@@ -9,7 +9,7 @@ Visual Studio Project settings:
 Execution of Python file:
 =========================
 
-cd to the directory C:\PROGRAMSANDEXPERIMENTS\ZEMAX\Extend\ArrayTrace and execute
+cd to the directory ...\ArrayTrace and execute
 the following command from cmd prompt:
 
     python arrayTraceClient.py

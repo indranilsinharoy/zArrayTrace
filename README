@@ -1,19 +1,38 @@
 Experimental code in development for array ray tracing in Zemax from Python.
 
-The code is completely experimental at this stage, and it is not even in
-working state.
+The code is completely experimental at this stage at the moment. The essential
+idea is to use ctypes to create an interface for array ray tracing from
+the example code (zclient.c and ArrayDemo.c) provided by Zemax. 
 
+
+Things that are currently working
+=================================
+1. Able to do array ray tracing (independent of PyZDDE). The output matches
+   the output of the ArrayDemo.c example that comes with Zemax, using the 
+   lens file Cooke 40 degree field.zmx. The output of ArrayDemo.c is in the
+   file arrayDemoRef.txt. The output of the function 
 
 
 Roadmap
 =======
-1. Get the array ray tracing code working independent of PyZDDE.
+1. Improve the Python interface for calling array ray tracing.
 2. Figure out how to integrate the code with PyZDDE, so that array ray 
    tracing may be performed for an existing lens in the Zemax DDE server
    setup using PyZDDE.
+3. Build both 32 bit and 64 bit dlls and test on other machines.
 
 
 
+Credits
+=======
+The following people deserves special credit (even if we don't end up using
+this code). Ian sent me a working code for tracing large number of rays 
+sometime back, which gave me some crucial ideas about the implementation. 
+Julian, who was also successful in implementing array ray tracing using 
+ctypes, communicated several ideas with me about the implementation. 
+
+1. Ian Rousseau (Creative Microsystems)
+2. Julian Stürmer
 
 License
 =======
