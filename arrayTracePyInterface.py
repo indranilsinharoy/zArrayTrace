@@ -130,7 +130,8 @@ def test_interface_one():
                       # BE WORKING ON THE LENS THAT IS IN THE MAIN ZEMAX APPLICATION WINDOW!!!!
     #ln.zNewLens()     # THIS IS JUST TO PROVE THE ABOVE POINT!!! RAY TRACING STILL ON THE LENS
                       # IN THE MAIN ZEMAX APPLICATION, EVENTHOUGH THE LENS IN THE DDE SERVER IS A "NEW LENS"
-    numRays = 441
+    #numRays = 441
+    numRays = 10201
     #rd = getRayDataArray(numRays, tType=0.0, mode=0)
     rd = (DdeArrayData * (numRays + 1))()
     # Setup a basic ray data array for test
@@ -141,11 +142,11 @@ def test_interface_one():
 
     # Fill the rest of the ray data array
     k = 0
-    for i in xrange(-10, 11, 1):
-        for j in xrange(-10, 11, 1):
+    for i in xrange(-50, 51, 1):
+        for j in xrange(-50, 51, 1):
             k += 1
-            rd[k].z = i/20                   # px
-            rd[k].l = j/20                   # py
+            rd[k].z = i/100                   # px
+            rd[k].l = j/100                   # py
             rd[k].intensity = 1.0
             rd[k].wave = 1
 
@@ -165,11 +166,11 @@ def test_interface_one():
         with open(tmp_file, 'w') as f:
             f.write("Listing of Array trace data\n")
             f.write("     px      py error            xout            yout   trans\n")
-            for i in xrange(-10, 11, 1):
-                for j in xrange(-10, 11, 1):
+            for i in xrange(-50, 51, 1):
+                for j in xrange(-50, 51, 1):
                     k += 1
                     line = ("{:7.3f} {:7.3f} {:5d} {:15.6E} {:15.6E} {:7.4f}\n"
-                            .format(i/20, j/20, rd[k].error, rd[k].x, rd[k].y, rd[k].intensity))
+                            .format(i/100, j/100, rd[k].error, rd[k].x, rd[k].y, rd[k].intensity))
                     f.write(line)
         print("Done writing ray trace data to file")
     else:

@@ -8,6 +8,7 @@ import os as os
 import sys as sys
 import time as time
 from ctypes import  WinDLL, c_int, c_double, Structure, POINTER, c_char_p, create_string_buffer
+import matplotlib.pyplot as plt
 #import numpy as np
 #from numpy.ctypeslib import load_library
 
