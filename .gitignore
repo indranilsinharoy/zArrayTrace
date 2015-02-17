@@ -70,3 +70,7 @@ ipch/
 *.psess
 *.vsp
 *.vspx
+
+# Python files
+*.pyc
+rtd_py_interface_01.txt
