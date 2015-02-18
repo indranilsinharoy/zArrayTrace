@@ -19,78 +19,43 @@ HWND hwndServer, hwndClient;
 DDERAYDATA *rdpGRD = NULL;
 DDERAYDATA *gPtr2RD = NULL;  /* used for passing the ray data array to the user function */
 
-
-void UserFunction(void)
+BOOL APIENTRY DllMain(HINSTANCE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
-    static char szBuffer[5000], szSub[256], szAppName[] = "Array Demo";
-
-    /* first, update the lens so we have the latest data; and then test to make sure the system is valid */
-    PostRequestMessage("GetUpdate", szBuffer);
-
-    if (atoi(GetString(szBuffer, 0, szSub)))
+    switch (ul_reason_for_call)
     {
-        /* the current lens cannot be traced! */
-        /* some features may be able to create data without tracing rays; some can't */
-        /* If data cannot be created return "empty" data displays */
-        sprintf(szBuffer, "???");
-        MakeEmptyWindow(1, szAppName, szBuffer);
-        return;
+    case DLL_PROCESS_ATTACH:
+        globalhInstance = (HINSTANCE)hModule;
+        break;
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
     }
-  
-    /* Now go get the data .... the data is put back into gPtr2RD in the 
-       function PostArrayTraceMessage*/
-    PostArrayTraceMessage(szBuffer, gPtr2RD);
-    
-    gPtr2RD = NULL;
+    return TRUE;
 }
 
-void print_ray_data(DDERAYDATA * pRAD)
+
+void rayTraceFunction(void)
 {
-    /*helper function to print ray data, which may be useful
-      for code testing visually*/
-    int numRays;
-    int i;
-    printf("\nRay data info @ C side:\n");
-    numRays = pRAD[0].error;
-    printf("Total number of rays = %d\n", numRays);
-    for (i = 0; i <= numRays; i++)
-    {
-        printf("\npRAD[%d].x = %f", i, pRAD[i].x);
-        printf("\npRAD[%d].y = %f", i, pRAD[i].y);
-        printf("\npRAD[%d].z = %f", i, pRAD[i].z);
-        printf("\npRAD[%d].l = %f", i, pRAD[i].l);
-        printf("\npRAD[%d].m = %f", i, pRAD[i].m);
-        printf("\npRAD[%d].n = %f", i, pRAD[i].n);
-        printf("\npRAD[%d].opd =%f", i, pRAD[i].opd);
-        printf("\npRAD[%d].intensity = %f", i, pRAD[i].intensity);
-        printf("\npRAD[%d].Exr = %f", i, pRAD[i].Exr);
-        printf("\npRAD[%d].Exi = %f", i, pRAD[i].Exi);
-        printf("\npRAD[%d].Eyr = %f", i, pRAD[i].Eyr);
-        printf("\npRAD[%d].Eyi = %f", i, pRAD[i].Eyi);
-        printf("\npRAD[%d].Ezr = %f", i, pRAD[i].Ezr);
-        printf("\npRAD[%d].Ezi = %f", i, pRAD[i].Ezi);
-        printf("\npRAD[%d].wave = %d", i, pRAD[i].wave);
-        printf("\npRAD[%d].error = %d", i, pRAD[i].error);
-        printf("\npRAD[%d].vigcode = %d", i, pRAD[i].vigcode);
-        printf("\npRAD[%d].want_opd = %d", i, pRAD[i].want_opd);
-        printf("\n");
-    }
+    static char szBuffer[5000];
+    int ret = 0;
+    ret = PostArrayTraceMessage(szBuffer, gPtr2RD);
+    /* clear the pointer */
+    gPtr2RD = NULL;
 }
 
 int __stdcall arrayTrace(DDERAYDATA * pRAD)
 {
-    HWND hwnd;
+    HWND hwnd;  /* handle to client window */
     MSG msg;
     WNDCLASSEX wndclass;
-    HINSTANCE hInstance = NULL;
-    HINSTANCE hPrevInstance = NULL;
 
     wndclass.cbSize = sizeof(wndclass);
     wndclass.style = CS_HREDRAW | CS_VREDRAW;
     wndclass.lpfnWndProc = WndProc;
     wndclass.cbClsExtra = 0;
     wndclass.cbWndExtra = 0;
-    wndclass.hInstance = NULL;         // hInstance;
+    wndclass.hInstance = globalhInstance;
     wndclass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
     wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
@@ -99,14 +64,14 @@ int __stdcall arrayTrace(DDERAYDATA * pRAD)
     wndclass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
     RegisterClassEx(&wndclass);
 
-    globalhInstance = hPrevInstance;
-
-    gPtr2RD = pRAD;  /* point to where the data is so that the userfunction() can access it */
-
-    hwnd = CreateWindow(szAppName, "ZEMAX Client", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL);
+    /* assign the pointer to ray data a global pointer so that rayTraceFunction() can access it*/
+    gPtr2RD = pRAD;  
+    
+    hwnd = CreateWindow(szAppName, "ZEMAX Client", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
+             CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, globalhInstance, NULL);
     UpdateWindow(hwnd);
     SendMessage(hwnd, WM_USER_INITIATE, 0, 0L);
-
+  
     while (GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
@@ -162,9 +127,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
         aTop = GlobalAddAtom("RayData");
 
-        //printf("\nDBG printf: WM_USER_INITIATE : ZEMAX_INSTANCE = %d\n", ZEMAX_INSTANCE);
-
-        SendMessage(HWND_BROADCAST, WM_DDE_INITIATE, (WPARAM)hwnd, MAKELONG(aApp, aTop));
+        //SendMessage(HWND_BROADCAST, WM_DDE_INITIATE, (WPARAM)hwnd, MAKELONG(aApp, aTop));    
+        SendMessage(HWND_BROADCAST, WM_DDE_INITIATE, (WPARAM)hwnd, PackDDElParam(WM_DDE_INITIATE, aApp, aTop));
 
         /* delete the atoms */
         GlobalDeleteAtom(aApp);
@@ -173,14 +137,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
         /* If no response, terminate */
         if (hwndServer == NULL)
         {
-            MessageBox(hwnd, "Cannot communicate with ZEMAX!", "Hello?", MB_ICONEXCLAMATION | MB_OK);
+            printf("\nCannot communicate with ZEMAX! Zemax may not be open!\n"); 
+            MessageBox(hwnd, "Cannot communicate with ZEMAX!", "ERROR", MB_ICONEXCLAMATION | MB_OK);
             DestroyWindow(hwnd);
             return 0;
         }
 
         hwndClient = hwnd;
 
-        UserFunction();  /* UserFunction(szCommandLine);*/
+        rayTraceFunction();
 
         /* terminate the DDE connection */
         PostMessage(hwndServer, WM_DDE_TERMINATE, (WPARAM)hwnd, 0L);
@@ -206,13 +171,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
         DdeAck.fBusy = FALSE;
         DdeAck.fAck = FALSE;
 
-
         // Check for matching format, put the data in the buffer
         if (pDdeData->cfFormat == CF_TEXT)
         {
             /* get the data back into RD */
-            if (rdpGRD) memcpy(rdpGRD, (DDERAYDATA *)pDdeData->Value, (ngNumRays + 1)*sizeof(DDERAYDATA));
-            else strcpy(szGlobalBuffer, (char *)pDdeData->Value);
+            if (rdpGRD) 
+                memcpy(rdpGRD, (DDERAYDATA *)pDdeData->Value, (ngNumRays + 1)*sizeof(DDERAYDATA));
+            else 
+                strcpy(szGlobalBuffer, (char *)pDdeData->Value);
         }
 
         GotData = 1;
@@ -245,8 +211,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
         {
             uiLow = (UINT_PTR)NULL;
             uiHi = (UINT_PTR)NULL;
-            UnpackDDElParam(WM_DDE_ACK, lParam, &uiLow, &uiHi);
-            FreeDDElParam(WM_DDE_ACK, lParam);
+            //UnpackDDElParam(WM_DDE_ACK, lParam, &uiLow, &uiHi);    /* Was causing memory error right after the SendMessage() call from case WM_USER_INITIATE:*/
+            //FreeDDElParam(WM_DDE_ACK, lParam);                     /* Was causing memory error right after the SendMessage() call from case WM_USER_INITIATE:*/
+            uiLow = (UINT_PTR)(((UINT)lParam) & 0xffff);
+            uiHi = (UINT_PTR)((((UINT)lParam) >> 16) & 0xffff);
             hwndServer = (HWND)wParam;
             if (uiLow) GlobalDeleteAtom((ATOM)uiLow);
             if (uiHi) GlobalDeleteAtom((ATOM)uiHi);
@@ -256,8 +224,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
             HWND dummy;
             uiLow = (UINT_PTR)NULL;
             uiHi = (UINT_PTR)NULL;
-            UnpackDDElParam(WM_DDE_ACK, lParam, &uiLow, &uiHi);
-            FreeDDElParam(WM_DDE_ACK, lParam);
+            //UnpackDDElParam(WM_DDE_ACK, lParam, &uiLow, &uiHi);
+            //FreeDDElParam(WM_DDE_ACK, lParam); 
+            uiLow = (UINT_PTR)(((UINT)lParam) & 0xffff);
+            uiHi = (UINT_PTR)((((UINT)lParam) >> 16) & 0xffff);
             dummy = (HWND)wParam;
             if (uiLow) GlobalDeleteAtom((ATOM)uiLow);
             if (uiHi) GlobalDeleteAtom((ATOM)uiHi);
@@ -308,7 +278,11 @@ void WaitForData(HWND hwnd)
         sleep_count++;
         if (sleep_count > 10000)
         {
-            if (GetCurrentTime() - dwTime > DDE_TIMEOUT) return;
+            if (GetCurrentTime() - dwTime > DDE_TIMEOUT)
+            { 
+                printf("\n Timeout reached!!!\n"); /*insr TODO:: notify timeout ... maybe send msg to Python*/
+                return; 
+            }  
             sleep_count = 0;
         }
     }
@@ -329,7 +303,6 @@ char * GetString(char *szBuffer, int n, char *szSubString)
 
         if (szBuffer[i] == '"')
         {
-
             i++;
             j++;
             szTest[j] = szBuffer[i];
@@ -364,32 +337,6 @@ char * GetString(char *szBuffer, int n, char *szSubString)
     return szSubString;
 }
 
-int PostRequestMessage(char *szItem, char *szBuffer)
-{
-    ATOM aItem;
-
-    aItem = GlobalAddAtom(szItem);
-
-    /* clear the buffers */
-    szGlobalBuffer[0] = '\0';
-    szBuffer[0] = '\0';
-
-    GotData = 0;
-
-    if (!PostMessage(hwndServer, WM_DDE_REQUEST, (WPARAM)hwndClient, PackDDElParam(WM_DDE_REQUEST, CF_TEXT, aItem)))
-    {
-        MessageBox(hwndClient, "Cannot communicate with ZEMAX!", "Hello?", MB_ICONEXCLAMATION | MB_OK);
-        GlobalDeleteAtom(aItem);
-        return -1;
-    }
-
-    WaitForData(hwndClient);
-    strcpy(szBuffer, szGlobalBuffer);
-
-    if (GotData) return 0;
-    else return -1;
-}
-
 int PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD)
 {
     ATOM aItem;
@@ -397,8 +344,7 @@ int PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD)
     DDEPOKE * lpPokeData;
     long numbytes;
     int numrays;
-
-
+    
     if (RD[0].opd > 4)
     {
         /* NSC Rays */
@@ -438,49 +384,14 @@ int PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD)
         return -1;
     }
     GlobalDeleteAtom(aItem);
-
     WaitForData(hwndClient);
-
     strcpy(szBuffer, szGlobalBuffer);
 
     /* clear the pointer */
     rdpGRD = NULL;
 
-    if (GotData) return 0;
-    else return -1;
-}
-
-void MakeEmptyWindow(int text, char *szAppName, char *szOptions)
-{
-    char szOutputFile[260], szModuleName[260], szBuffer[5000];
-    FILE *output;
-
-    /* get the output file name */
-    GetString(szCommandLine, 2, szOutputFile);
-
-    /* get the module name */
-    GetModuleFileName(globalhInstance, szModuleName, 255);
-
-    if ((output = fopen(szOutputFile, "wt")) == NULL)
-    {
-        /* can't open the file!! */
-        return;
-    }
-
-    if (text)
-    {
-        fputs("System is invalid, cannot compute data.\n", output);
-        fclose(output);
-        /* create a text window. Note we pass back the filename, module name, and activesurf as a single setting parameter. */
-        sprintf(szBuffer, "MakeTextWindow,\"%s\",\"%s\",\"%s\",%s", szOutputFile, szModuleName, szAppName, szOptions);
-        PostRequestMessage(szBuffer, szBuffer);
-    }
-    else
-    {
-        fputs("NOFRAME\n", output);
-        fputs("TEXT \"System is invalid, cannot compute data.\" .1 .5\n", output);
-        fclose(output);
-        sprintf(szBuffer, "MakeGraphicWindow,\"%s\",\"%s\",\"%s\",1,%s", szOutputFile, szModuleName, szAppName, szOptions);
-        PostRequestMessage(szBuffer, szBuffer);
-    }
+    if (GotData) 
+        return 0;
+    else 
+        return -1;
 }

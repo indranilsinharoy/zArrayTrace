@@ -1,6 +1,6 @@
 from __future__ import print_function, division
-#import pyzdde.zdde as pyz
-#import matplotlib.pyplot as plt
+import pyzdde.zdde as pyz
+import matplotlib.pyplot as plt
 import os as os
 import sys as sys
 from ctypes import  WinDLL, c_int, c_double, Structure, POINTER, c_char_p, create_string_buffer
@@ -122,23 +122,17 @@ def getRayDataArray(numRays, tType=0, mode=0, startSurf=None, endSurf=-1):
 # ###############################################################
 
 def test_interface_one():
-    #ln = pyz.createLink()
-    #ln.zLoadFile(lensfile)
-    #print("Loaded zemax file:", ln.zGetFile())
+    ln = pyz.createLink()
+    ln.zLoadFile(lensfile)
+    print("Loaded zemax file:", ln.zGetFile())
 
-    #ln.zPushLens(1)   # FOR SOME REASON, THE ARRAY RAY TRACING SEEMS TO
+    ln.zPushLens(1)   # FOR SOME REASON, THE ARRAY RAY TRACING SEEMS TO
                       # BE WORKING ON THE LENS THAT IS IN THE MAIN ZEMAX APPLICATION WINDOW!!!!
-    #ln.zNewLens()     # THIS IS JUST TO PROVE THE ABOVE POINT!!! RAY TRACING STILL ON THE LENS
+    ln.zNewLens()     # THIS IS JUST TO PROVE THE ABOVE POINT!!! RAY TRACING STILL ON THE LENS
                       # IN THE MAIN ZEMAX APPLICATION, EVENTHOUGH THE LENS IN THE DDE SERVER IS A "NEW LENS"
     #numRays = 441
     numRays = 10201
-    #rd = getRayDataArray(numRays, tType=0.0, mode=0)
-    rd = (DdeArrayData * (numRays + 1))()
-    # Setup a basic ray data array for test
-    rd[0].opd = 0.0
-    rd[0].wave = 0
-    rd[0].error = c_int(numRays)
-    rd[0].want_opd = -1
+    rd = getRayDataArray(numRays, tType=0.0, mode=0)
 
     # Fill the rest of the ray data array
     k = 0
@@ -176,10 +170,10 @@ def test_interface_one():
     else:
         print("There was some problem in ray tracing")
 
-    #print("Zemax version", ln.zGetVersion())  # To test if the PyZDDE based link still exist or not?
+    print("Zemax version", ln.zGetVersion())  # To test if the PyZDDE based link still exist or not?
 
     # close PyZDDE link
-    #ln.close()
+    ln.close()
 
 if __name__ == '__main__':
     test_interface_one()

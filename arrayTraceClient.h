@@ -25,11 +25,8 @@ typedef struct
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 void WaitForData(HWND hwnd);
 char *GetString(char *szBuffer, int n, char *szSubString);
-int  PostRequestMessage(char *szItem, char *szBuffer);
 int  PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD);
-void UserFunction(); 
-void MakeEmptyWindow(int text, char *szAppName, char *szOptions);
-void print_ray_data(DDERAYDATA * pRAD);
+void rayTraceFunction();
 DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD);
 
 #ifdef __cplusplus

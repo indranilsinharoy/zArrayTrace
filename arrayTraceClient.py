@@ -9,6 +9,7 @@ import sys as sys
 import time as time
 from ctypes import  WinDLL, c_int, c_double, Structure, POINTER, c_char_p, create_string_buffer
 import matplotlib.pyplot as plt
+import pyzdde.zdde as pyz
 #import numpy as np
 #from numpy.ctypeslib import load_library
 
@@ -107,6 +108,7 @@ def replicateArrayDemo(func):
     end_time = time.clock()
     print("Time before tracing: ", (start_time)*10e6, "micro seconds")
     print("Ray tracing took", (end_time - start_time)*10e3, " milli seconds")
+    print("ret = ", ret)
     if ret==0:
         #print_ray_data(rd, "Ray data info @ Python AFTER ray tracing:")
         k = 0
