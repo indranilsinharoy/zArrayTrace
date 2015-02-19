@@ -27,7 +27,7 @@ void WaitForData(HWND hwnd);
 char *GetString(char *szBuffer, int n, char *szSubString);
 int  PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD);
 void rayTraceFunction();
-DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD);
+DLL_EXPORT int __stdcall arrayTrace(DDERAYDATA * pRAD, unsigned int timeout);
 
 #ifdef __cplusplus
 }

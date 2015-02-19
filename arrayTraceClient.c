@@ -18,6 +18,10 @@ HINSTANCE globalhInstance;
 HWND hwndServer, hwndClient;
 DDERAYDATA *rdpGRD = NULL;
 DDERAYDATA *gPtr2RD = NULL;  /* used for passing the ray data array to the user function */
+unsigned int DdeTimeout;
+int RETVAL = 0;              /* Return value to Python indicating general error conditions*/
+                             /* 0 = SUCCESS, -1 = Couldn't retrieve data in PostArrayTraceMessage, 
+                                -999 = Couldn't communicate with Zemax, -998 = timeout reached, etc*/
 
 BOOL APIENTRY DllMain(HINSTANCE hModule, DWORD  ul_reason_for_call, LPVOID lpReserved)
 {
@@ -40,11 +44,12 @@ void rayTraceFunction(void)
     static char szBuffer[5000];
     int ret = 0;
     ret = PostArrayTraceMessage(szBuffer, gPtr2RD);
+    RETVAL = ret;  /* ret = -1, if couldn't get data*/
     /* clear the pointer */
     gPtr2RD = NULL;
 }
 
-int __stdcall arrayTrace(DDERAYDATA * pRAD)
+int __stdcall arrayTrace(DDERAYDATA * pRAD, unsigned int timeout)
 {
     HWND hwnd;  /* handle to client window */
     MSG msg;
@@ -66,6 +71,11 @@ int __stdcall arrayTrace(DDERAYDATA * pRAD)
 
     /* assign the pointer to ray data a global pointer so that rayTraceFunction() can access it*/
     gPtr2RD = pRAD;  
+
+    if (timeout > DDE_TIMEOUT)
+        DdeTimeout = timeout;
+    else
+        DdeTimeout = DDE_TIMEOUT;
     
     hwnd = CreateWindow(szAppName, "ZEMAX Client", WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
              CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, globalhInstance, NULL);
@@ -77,7 +87,7 @@ int __stdcall arrayTrace(DDERAYDATA * pRAD)
         TranslateMessage(&msg);
         DispatchMessage(&msg);
     }
-    return (int)msg.wParam;
+    return RETVAL;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
@@ -137,9 +147,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
         /* If no response, terminate */
         if (hwndServer == NULL)
         {
-            printf("\nCannot communicate with ZEMAX! Zemax may not be open!\n"); 
-            MessageBox(hwnd, "Cannot communicate with ZEMAX!", "ERROR", MB_ICONEXCLAMATION | MB_OK);
+            printf("\nCannot communicate with ZEMAX! Zemax may not be running!\n"); 
+            //MessageBox(hwnd, "Cannot communicate with ZEMAX!", "ERROR", MB_ICONEXCLAMATION | MB_OK);
             DestroyWindow(hwnd);
+            RETVAL = -999;
             return 0;
         }
 
@@ -278,9 +289,10 @@ void WaitForData(HWND hwnd)
         sleep_count++;
         if (sleep_count > 10000)
         {
-            if (GetCurrentTime() - dwTime > DDE_TIMEOUT)
+            if (GetCurrentTime() - dwTime > DdeTimeout)
             { 
-                printf("\n Timeout reached!!!\n"); /*insr TODO:: notify timeout ... maybe send msg to Python*/
+                printf("\nTimeout reached!\n");      /* will be visible in stdout*/
+                RETVAL = -998;                     /* indicate to python calling function */
                 return; 
             }  
             sleep_count = 0;
@@ -378,9 +390,11 @@ int PostArrayTraceMessage(char *szBuffer, DDERAYDATA *RD)
 
     if (!PostMessage(hwndServer, WM_DDE_POKE, (WPARAM)hwndClient, PackDDElParam(WM_DDE_POKE, (UINT)hPokeData, aItem)))
     {
-        MessageBox(hwndClient, "Cannot communicate with ZEMAX!", "Hello?", MB_ICONEXCLAMATION | MB_OK);
+        //MessageBox(hwndClient, "Cannot communicate with ZEMAX!", "Hello?", MB_ICONEXCLAMATION | MB_OK);
+        printf("\nCannot communicate with ZEMAX! Cannot trace rays!\n");
         GlobalDeleteAtom(aItem);
         GlobalFree(hPokeData);
+        RETVAL = -999;
         return -1;
     }
     GlobalDeleteAtom(aItem);

@@ -4,8 +4,9 @@ Visual Studio Project settings:
 2. Add the existing files arrayTraceClient.h to the Header Files (under 
    Solutions Explorer), and arrayTraceClient.c to the Source Files. Also, 
 3. Solutions Platform >> x64/Win32 & Release
-4. Configuration Properties >> General >> Character Set >> Use Multi-Byte Character Set 
-5. Build.
+4. Configuration Properties >> General >> Character Set >> Use Multi-Byte Character Set
+5. Under C/C++ code generation >> Runtime Library select /MT option for static linking of dependencies in the DLL. This will ensure that the build DLLs have the required runtime dependencies and should run in all windows machines. 
+6. Build.
 
 
 Execution of Python file:
